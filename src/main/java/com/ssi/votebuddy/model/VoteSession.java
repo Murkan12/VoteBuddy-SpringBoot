@@ -19,14 +19,16 @@ public class VoteSession {
     @JoinColumn(name = "user_id")
     private User sessionOwner;
 
-    @ManyToMany
+    @JsonIgnore
+    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(name = "user_vote_sessions",
     joinColumns = @JoinColumn(name = "session_id"),
     inverseJoinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "session_voters")
     private Set<User> sessionVoters;
 
-    private Set<String> voteOptions;
+    @OneToMany(mappedBy = "voteSession", cascade = CascadeType.ALL)
+    private Set<VoteOption> voteOptions;
 
     public Long getSessionId() {
         return sessionId;
@@ -50,5 +52,13 @@ public class VoteSession {
 
     public void addSessionVoters(User user) {
         sessionVoters.add(user);
+    }
+
+    public Set<VoteOption> getVoteOptions() {
+        return voteOptions;
+    }
+
+    public void setVoteOptions(Set<VoteOption> voteOptions) {
+        this.voteOptions = voteOptions;
     }
 }

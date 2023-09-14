@@ -19,7 +19,7 @@ public class SecurityConfig {
                 .cors().disable()
                 .csrf().disable()
                 .authorizeHttpRequests(request -> {
-                    request.requestMatchers("/", "/register", "/session**").permitAll();
+                    request.requestMatchers("/", "/register", "/session/**").permitAll();
                     request.requestMatchers("/secured").authenticated();
                 })
                 .formLogin(Customizer.withDefaults())
