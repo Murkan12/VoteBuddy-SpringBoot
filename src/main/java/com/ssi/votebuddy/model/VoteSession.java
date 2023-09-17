@@ -2,24 +2,26 @@ package com.ssi.votebuddy.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "vote_sessions")
 public class VoteSession {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "session_id")
-    private Long sessionId;
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @Column(name = "session_id", columnDefinition = "BINARY(16)")
+    private UUID sessionId;
 
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User sessionOwner;
 
-    @JsonIgnore
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(name = "user_vote_sessions",
     joinColumns = @JoinColumn(name = "session_id"),
@@ -30,11 +32,11 @@ public class VoteSession {
     @OneToMany(mappedBy = "voteSession", cascade = CascadeType.ALL)
     private Set<VoteOption> voteOptions;
 
-    public Long getSessionId() {
+    public UUID getSessionId() {
         return sessionId;
     }
 
-    public void setSessionId(Long sessionId) {
+    public void setSessionId(UUID sessionId) {
         this.sessionId = sessionId;
     }
 

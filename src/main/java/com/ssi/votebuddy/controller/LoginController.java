@@ -1,6 +1,7 @@
 package com.ssi.votebuddy.controller;
 
 import com.ssi.votebuddy.model.User;
+import com.ssi.votebuddy.repository.UserRepository;
 import com.ssi.votebuddy.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,10 +17,13 @@ public class LoginController {
 
     private final UserService userService;
 
+    private final UserRepository userRepository;
+
     private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
-    public LoginController(UserService userService) {
+    public LoginController(UserService userService, UserRepository userRepository) {
         this.userService = userService;
+        this.userRepository = userRepository;
     }
 
     @PostMapping("/register")
@@ -31,6 +35,6 @@ public class LoginController {
 
     @GetMapping("/")
     public List<User> listUsers() {
-        return userService.findAll();
+        return userRepository.findAll();
     }
 }

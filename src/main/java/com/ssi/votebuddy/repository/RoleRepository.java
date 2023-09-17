@@ -1,11 +1,11 @@
 package com.ssi.votebuddy.repository;
 
-import com.ssi.votebuddy.model.VoteSession;
+import com.ssi.votebuddy.model.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.UUID;
-
 @Repository
-public interface VoteSessionRepository extends JpaRepository<VoteSession, UUID> {
+public interface RoleRepository extends JpaRepository<Role, Long> {
+
+    Role findByRoleName(String roleName);
 }

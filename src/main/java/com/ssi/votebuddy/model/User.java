@@ -2,7 +2,6 @@ package com.ssi.votebuddy.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 import java.util.Set;
@@ -22,7 +21,10 @@ public class User {
     @Column(name = "user_pwd")
     private String pwd;
 
-    @JsonIgnore
+    @Column(name = "user_role")
+    @OneToMany(mappedBy = "userId", fetch = FetchType.EAGER)
+    private Set<Role> role;
+
     @OneToMany(mappedBy = "sessionOwner", cascade = CascadeType.ALL)
     private Set<VoteSession> ownedSessions;
 
@@ -51,6 +53,14 @@ public class User {
 
     public void setPwd(String pwd) {
         this.pwd = pwd;
+    }
+
+    public Set<Role> getRole() {
+        return role;
+    }
+
+    public void setRole(Set<Role> role) {
+        this.role = role;
     }
 
     public Set<VoteSession> getOwnedSessions() {

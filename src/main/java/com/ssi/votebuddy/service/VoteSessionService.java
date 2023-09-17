@@ -11,10 +11,7 @@ import com.ssi.votebuddy.repository.VoteOptionsRepository;
 import com.ssi.votebuddy.repository.VoteSessionRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class VoteSessionService {
@@ -57,7 +54,7 @@ public class VoteSessionService {
         }
     }
 
-    public VoteOption vote(Long userId, Long sessionId, Long voteOptionId) throws Exception {
+    public VoteOption vote(Long userId, UUID sessionId, Long voteOptionId) throws Exception {
         VoteSession voteSession = sessionRepository.findById(sessionId).orElse(null);
         User votingUser = userRepository.findById(userId).orElse(null);
 
@@ -110,7 +107,7 @@ public class VoteSessionService {
         return users.contains(testedUser);
     }
 
-    public VoteSession find(long sessionId) {
+    public VoteSession find(UUID sessionId) {
         return sessionRepository.findById(sessionId).orElse(null);
     }
 
