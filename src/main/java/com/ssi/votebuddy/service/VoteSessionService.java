@@ -9,6 +9,7 @@ import com.ssi.votebuddy.model.VoteSession;
 import com.ssi.votebuddy.repository.UserRepository;
 import com.ssi.votebuddy.repository.VoteOptionsRepository;
 import com.ssi.votebuddy.repository.VoteSessionRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -60,9 +61,10 @@ public class VoteSessionService {
 
         if (voteSession != null && votingUser != null) {
             boolean userInSession = checkIfUserInSession(votingUser, voteSession);
+            boolean isOpen = checkIfIsOpen(sessionId);
             VoteOption voteOption = getVoteOption(voteSession, voteOptionId);
 
-            if (!userInSession && voteOption != null) {
+            if (!userInSession && voteOption != null && isOpen) {
                 voteSession.addSessionVoters(votingUser);
                 voteOption.incrementNumberOfVotes();
                 sessionRepository.save(voteSession);
@@ -70,6 +72,8 @@ public class VoteSessionService {
                 return optionsRepository.save(voteOption);
             } else if (userInSession) {
                 throw new AlreadyVotedException("User already voted");
+            } else if (!isOpen) {
+                throw new ResourceNotFoundException("Vote session is closed");
             } else {
                 throw new ResourceNotFoundException("Option with given id doesn't exist");
             }
@@ -78,6 +82,19 @@ public class VoteSessionService {
         } else {
             throw new ResourceNotFoundException("User not found");
         }
+    }
+
+    @PreAuthorize("#ownerId == authentication.principal.id")
+    public VoteSession closeVoteSession(UUID sessionId, Long ownerId) throws ResourceNotFoundException{
+        VoteSession voteSession = sessionRepository.findById(sessionId).orElse(null);
+
+        if (voteSession != null) {
+            voteSession.setIsOpen(false);
+
+            return sessionRepository.save(voteSession);
+        }
+
+        throw new ResourceNotFoundException("Vote session with given id not found");
     }
 
     private void incrementVote(VoteSession voteSession, Long voteOptionId) {
@@ -105,6 +122,16 @@ public class VoteSessionService {
     private boolean checkIfUserInSession(User testedUser, VoteSession voteSession) {
         Set<User> users = voteSession.getSessionVoters();
         return users.contains(testedUser);
+    }
+
+    private boolean checkIfIsOpen(UUID sessionId) {
+        VoteSession voteSession = sessionRepository.findById(sessionId).orElse(null);
+
+        if (voteSession != null) {
+            return voteSession.getIsOpen();
+        }
+
+        return false;
     }
 
     public VoteSession find(UUID sessionId) {

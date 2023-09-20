@@ -22,6 +22,7 @@ public class VoteSession {
     @JoinColumn(name = "user_id")
     private User sessionOwner;
 
+    @JsonIgnore
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(name = "user_vote_sessions",
     joinColumns = @JoinColumn(name = "session_id"),
@@ -31,6 +32,9 @@ public class VoteSession {
 
     @OneToMany(mappedBy = "voteSession", cascade = CascadeType.ALL)
     private Set<VoteOption> voteOptions;
+
+    @Column(name = "is_open")
+    private Boolean isOpen = true;
 
     public UUID getSessionId() {
         return sessionId;
@@ -62,5 +66,13 @@ public class VoteSession {
 
     public void setVoteOptions(Set<VoteOption> voteOptions) {
         this.voteOptions = voteOptions;
+    }
+
+    public Boolean getIsOpen() {
+        return isOpen;
+    }
+
+    public void setIsOpen(Boolean isOpen) {
+        this.isOpen = isOpen;
     }
 }

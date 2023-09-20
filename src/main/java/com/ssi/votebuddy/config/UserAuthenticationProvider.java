@@ -1,5 +1,6 @@
 package com.ssi.votebuddy.config;
 
+import com.ssi.votebuddy.model.AuthedUser;
 import com.ssi.votebuddy.model.Role;
 import com.ssi.votebuddy.model.User;
 import com.ssi.votebuddy.repository.UserRepository;
@@ -42,7 +43,7 @@ public class UserAuthenticationProvider implements AuthenticationProvider {
             List<GrantedAuthority> authorities = getGrantedAuthorities(user.getRole());
 
             if (pwdMatches) {
-                return new UsernamePasswordAuthenticationToken(email, pwd, authorities);
+                return new UsernamePasswordAuthenticationToken(new AuthedUser(user.getId(), email), pwd, authorities);
             } else {
                 throw new BadCredentialsException("Incorrect password");
             }

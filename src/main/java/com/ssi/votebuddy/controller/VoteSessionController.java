@@ -12,7 +12,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,9 +43,9 @@ public class VoteSessionController {
     @PreAuthorize("#userId == authentication.principal.id")
     public ResponseEntity<?> createSession(@RequestParam("userId") Long userId, @RequestBody List<String> optionNames, @AuthenticationPrincipal User user) {
         try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             VoteSession voteSession = voteSessionService.create(userId, optionNames);
-            logger.info(voteSession.getSessionOwner().getEmail());
-            logger.info(user.getId().toString());
+            logger.info(authentication.getPrincipal().toString());
 
             return ResponseEntity.status(HttpStatus.CREATED).body(voteSession);
         } catch (ResourceNotFoundException ex) {
@@ -56,7 +58,7 @@ public class VoteSessionController {
     }
 
     @PatchMapping("/vote")
-    public ResponseEntity<?> vote(@RequestParam Long userId, UUID sessionId, Long voteOptionId) {
+    public ResponseEntity<?> vote(@RequestParam Long userId, @RequestParam UUID sessionId, @RequestParam Long voteOptionId) {
         try {
             VoteOption voteOption = voteSessionService.vote(userId, sessionId, voteOptionId);
 
@@ -65,6 +67,18 @@ public class VoteSessionController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
         } catch (AlreadyVotedException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+        }
+    }
+
+    @PatchMapping("/closeVote")
+    @PreAuthorize("#ownerId == authentication.principal.id")
+    public ResponseEntity<?> closeVote(@RequestParam UUID sessionId, @RequestParam Long ownerId) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(voteSessionService.closeVoteSession(sessionId, ownerId));
+        } catch (ResourceNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
         }

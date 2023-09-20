@@ -22,7 +22,8 @@ public class SecurityConfig {
                 .csrf().disable()
                 .authorizeHttpRequests(request -> {
                     request.requestMatchers("/", "/register", "/login", "/roles").permitAll();
-                    request.requestMatchers("/secured", "/session", "/session/**").authenticated();
+                    request.requestMatchers("/secured", "/session", "/session/**", "/listUsers").authenticated();
+                    request.requestMatchers("/listUsers", "/roles/**").hasRole("ADMIN");
                 })
                 .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults())
