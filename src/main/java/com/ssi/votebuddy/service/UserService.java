@@ -3,6 +3,7 @@ package com.ssi.votebuddy.service;
 import com.ssi.votebuddy.error.ResourceNotFoundException;
 import com.ssi.votebuddy.model.Role;
 import com.ssi.votebuddy.model.RoleName;
+import com.ssi.votebuddy.model.VoteSession;
 import com.ssi.votebuddy.repository.RoleRepository;
 import com.ssi.votebuddy.repository.UserRepository;
 import com.ssi.votebuddy.model.User;
@@ -12,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service

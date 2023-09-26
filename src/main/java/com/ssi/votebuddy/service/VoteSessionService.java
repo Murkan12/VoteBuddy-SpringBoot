@@ -10,6 +10,7 @@ import com.ssi.votebuddy.repository.UserRepository;
 import com.ssi.votebuddy.repository.VoteOptionsRepository;
 import com.ssi.votebuddy.repository.VoteSessionRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -85,16 +86,48 @@ public class VoteSessionService {
     }
 
     @PreAuthorize("#ownerId == authentication.principal.id")
-    public VoteSession closeVoteSession(UUID sessionId, Long ownerId) throws ResourceNotFoundException{
+    public VoteSession closeVoteSession(UUID sessionId, Long ownerId) throws ResourceNotFoundException, BadCredentialsException {
         VoteSession voteSession = sessionRepository.findById(sessionId).orElse(null);
+        User user = userRepository.findById(ownerId).orElse(null);
 
-        if (voteSession != null) {
-            voteSession.setIsOpen(false);
+        if (voteSession != null && user != null) {
+            if (voteSession.getSessionOwner().equals(user)) {
+                voteSession.setIsOpen(false);
 
-            return sessionRepository.save(voteSession);
+                return sessionRepository.save(voteSession);
+            } else {
+                throw new BadCredentialsException("User is not session owner");
+            }
+        } else if (user == null) {
+            throw new ResourceNotFoundException("User with given id not found");
+        } else {
+            throw new ResourceNotFoundException("Vote session with given id not found");
         }
+    }
 
-        throw new ResourceNotFoundException("Vote session with given id not found");
+    public VoteSession find(UUID sessionId) {
+        return sessionRepository.findById(sessionId).orElse(null);
+    }
+
+    public Set<VoteSession> getOwnedSessions(Long userId) throws ResourceNotFoundException {
+        User sessionOwner = userRepository.findById(userId).orElse(null);
+
+        if (sessionOwner != null) {
+            Set<VoteSession> openSessions = new HashSet<>();
+            for (VoteSession session : sessionOwner.getOwnedSessions()) {
+                if (checkIfIsOpen(session.getSessionId())) {
+                    openSessions.add(session);
+                }
+            }
+
+            return openSessions;
+        } else {
+            throw new ResourceNotFoundException("User with given id not found");
+        }
+    }
+
+    public List<VoteSession> findAll() {
+        return sessionRepository.findAll();
     }
 
     private void incrementVote(VoteSession voteSession, Long voteOptionId) {
@@ -134,11 +167,5 @@ public class VoteSessionService {
         return false;
     }
 
-    public VoteSession find(UUID sessionId) {
-        return sessionRepository.findById(sessionId).orElse(null);
-    }
 
-    public List<VoteSession> findAll() {
-        return sessionRepository.findAll();
-    }
 }

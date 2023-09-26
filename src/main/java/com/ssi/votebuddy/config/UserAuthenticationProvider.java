@@ -1,6 +1,6 @@
 package com.ssi.votebuddy.config;
 
-import com.ssi.votebuddy.model.AuthedUser;
+import com.ssi.votebuddy.dto.AuthedUser;
 import com.ssi.votebuddy.model.Role;
 import com.ssi.votebuddy.model.User;
 import com.ssi.votebuddy.repository.UserRepository;

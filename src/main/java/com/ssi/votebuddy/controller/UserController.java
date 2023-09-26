@@ -1,16 +1,14 @@
 package com.ssi.votebuddy.controller;
 
-import com.ssi.votebuddy.error.ResourceNotFoundException;
-import com.ssi.votebuddy.model.Role;
 import com.ssi.votebuddy.model.User;
 import com.ssi.votebuddy.repository.UserRepository;
 import com.ssi.votebuddy.service.UserService;
-import org.apache.coyote.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,6 +32,11 @@ public class UserController {
         logger.info(user.getEmail());
 
         return userService.create(user);
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<?> getUserDetails(Authentication authentication) {
+         return ResponseEntity.status(HttpStatus.OK).body(authentication.getPrincipal());
     }
 
     @GetMapping("/listUsers")
